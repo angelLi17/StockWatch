@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens from the Figma file. Tailwind turns each one into classes,
+ * e.g. --color-navy → bg-navy, text-navy, border-navy.
+ */
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+
+  --color-page: #01051a;     /* page background */
+  --color-navy: #02064a;     /* header bar, card headers, bottom nav */
+  --color-line: #1c2a63;     /* table and card borders */
+  --color-ink: #ffffff;      /* primary text */
+  --color-soft: #d6dbe8;     /* company names */
+  --color-muted: #8a94b8;    /* secondary text */
+  --color-dim: #2f3f8f;      /* placeholders, inactive nav */
+  --color-accent: #4fd2ef;   /* selected ticker, links */
+  --color-danger: #f87171;
+}
+
+body {
+  @apply bg-page text-ink font-sans antialiased;
+}
