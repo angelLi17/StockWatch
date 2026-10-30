@@ -39,3 +39,8 @@ cd client && npm install && npm run dev   # http://localhost:5173
 | PATCH / DELETE | `/api/alerts/:id` | ✓ | Update or re-arm / delete |
 
 Alerts are checked every minute by a cron job. If `SMTP_*` is set in `server/.env`, triggered alerts are also emailed.
+
+## Design
+
+Figma mockups: [StockWatch design](https://www.figma.com/design/ThiuE9hioDbE2DJJG7njOw/Project-2?node-id=8-26&p=f&t=jr1ha6h59wtgF2Bp-0)
+
