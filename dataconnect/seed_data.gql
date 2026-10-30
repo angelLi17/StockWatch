@@ -1,0 +1,31 @@
+mutation SeedDatabase @transaction {
+  user_insertMany(data: [
+    { id: "00000000-0000-0000-0000-000000000001", email: "alice@example.com", createdAt_expr: "request.time", displayName: "Alice" },
+    { id: "00000000-0000-0000-0000-000000000002", email: "bob@example.com", createdAt_expr: "request.time", displayName: "Bob" },
+    { id: "00000000-0000-0000-0000-000000000003", email: "charlie@example.com", createdAt_expr: "request.time", displayName: "Charlie" }
+  ])
+  portfolio_insertMany(data: [
+    { id: "10000000-0000-0000-0000-000000000001", userId: "00000000-0000-0000-0000-000000000001", name: "Alice Tech Portfolio" },
+    { id: "10000000-0000-0000-0000-000000000002", userId: "00000000-0000-0000-0000-000000000002", name: "Bob Growth Fund" },
+    { id: "10000000-0000-0000-0000-000000000003", userId: "00000000-0000-0000-0000-000000000003", name: "Charlie Dividend" }
+  ])
+  stock_insertMany(data: [
+    { id: "20000000-0000-0000-0000-000000000001", tickerSymbol: "AAPL", companyName: "Apple Inc.", sector: "Technology", currentPrice: 175.50 },
+    { id: "20000000-0000-0000-0000-000000000002", tickerSymbol: "GOOGL", companyName: "Alphabet Inc.", sector: "Technology", currentPrice: 140.20 },
+    { id: "20000000-0000-0000-0000-000000000003", tickerSymbol: "MSFT", companyName: "Microsoft Corp.", sector: "Technology", currentPrice: 400.10 }
+  ])
+  holding_insertMany(data: [
+    { id: "30000000-0000-0000-0000-000000000001", portfolioId: "10000000-0000-0000-0000-000000000001", stockId: "20000000-0000-0000-0000-000000000001", quantity: 10, averageCost: 150.0 },
+    { id: "30000000-0000-0000-0000-000000000002", portfolioId: "10000000-0000-0000-0000-000000000002", stockId: "20000000-0000-0000-0000-000000000002", quantity: 5, averageCost: 130.5 },
+    { id: "30000000-0000-0000-0000-000000000003", portfolioId: "10000000-0000-0000-0000-000000000003", stockId: "20000000-0000-0000-0000-000000000003", quantity: 2, averageCost: 380.0 }
+  ])
+  transaction_insertMany(data: [
+    { id: "40000000-0000-0000-0000-000000000001", holdingId: "30000000-0000-0000-0000-000000000001", type: "BUY", quantity: 10, pricePerShare: 150.0, timestamp_expr: "request.time" },
+    { id: "40000000-0000-0000-0000-000000000002", holdingId: "30000000-0000-0000-0000-000000000002", type: "BUY", quantity: 5, pricePerShare: 130.5, timestamp_expr: "request.time" },
+    { id: "40000000-0000-0000-0000-000000000003", holdingId: "30000000-0000-0000-0000-000000000003", type: "BUY", quantity: 2, pricePerShare: 380.0, timestamp_expr: "request.time" }
+  ])
+  watchlistItem_insertMany(data: [
+    { id: "50000000-0000-0000-0000-000000000001", userId: "00000000-0000-0000-0000-000000000001", stockId: "20000000-0000-0000-0000-000000000003", targetPriceAlert: 450.0 },
+    { id: "50000000-0000-0000-0000-000000000002", userId: "00000000-0000-0000-0000-000000000002", stockId: "20000000-0000-0000-0000-000000000001", targetPriceAlert: 200.0 }
+  ])
+}

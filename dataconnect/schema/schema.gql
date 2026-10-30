@@ -1,0 +1,42 @@
+type User @table {
+  email: String!
+  createdAt: Timestamp!
+  displayName: String
+  avatarUrl: String
+}
+
+type Portfolio @table {
+  name: String!
+  description: String
+  user: User!
+}
+
+type Stock @table {
+  tickerSymbol: String!
+  companyName: String!
+  sector: String
+  currentPrice: Float
+}
+
+type Holding @table {
+  quantity: Float!
+  averageCost: Float!
+  notes: String
+  portfolio: Portfolio!
+  stock: Stock!
+}
+
+type Transaction @table {
+  type: String!
+  quantity: Float!
+  pricePerShare: Float!
+  timestamp: Timestamp!
+  brokerName: String
+  holding: Holding!
+}
+
+type WatchlistItem @table {
+  targetPriceAlert: Float
+  user: User!
+  stock: Stock!
+}

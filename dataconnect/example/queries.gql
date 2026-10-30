@@ -1,0 +1,144 @@
+# User Operations
+mutation InsertUser($email: String!, $displayName: String, $avatarUrl: String) @auth(level: USER) {
+  user_insert(data: {
+    id_expr: "auth.uid",
+    email: $email,
+    displayName: $displayName,
+    avatarUrl: $avatarUrl,
+    createdAt_expr: "request.time"
+  })
+}
+
+mutation UpdateUser($displayName: String, $avatarUrl: String) @auth(level: USER) {
+  user_update(key: {id_expr: "auth.uid"}, data: {displayName: $displayName, avatarUrl: $avatarUrl})
+}
+
+mutation DeleteUser @auth(level: USER) {
+  user_delete(key: {id_expr: "auth.uid"})
+}
+
+query GetCurrentUser @auth(level: USER) {
+  user(key: {id_expr: "auth.uid"}) {
+    email
+    displayName
+    avatarUrl
+    createdAt
+  }
+}
+
+# Portfolio Operations
+mutation CreatePortfolio($name: String!, $description: String) @auth(level: USER) {
+  portfolio_insert(data: {
+    name: $name,
+    description: $description,
+    userId_expr: "auth.uid"
+  })
+}
+
+mutation UpdatePortfolio($id: UUID!, $name: String, $description: String) @auth(level: USER) {
+  portfolio_update(key: {id: $id}, data: {name: $name, description: $description})
+}
+
+mutation DeletePortfolio($id: UUID!) @auth(level: USER) {
+  portfolio_delete(key: {id: $id})
+}
+
+query ListMyPortfolios @auth(level: USER) {
+  portfolios(where: {userId: {eq_expr: "auth.uid"}}) {
+    id
+    name
+    description
+  }
+}
+
+# Stock Operations
+mutation InsertStock($tickerSymbol: String!, $companyName: String!, $sector: String, $currentPrice: Float) @auth(level: PUBLIC, insecureReason: "Public stock market data") {
+  stock_insert(data: {tickerSymbol: $tickerSymbol, companyName: $companyName, sector: $sector, currentPrice: $currentPrice})
+}
+
+mutation UpdateStockPrice($id: UUID!, $price: Float) @auth(level: PUBLIC, insecureReason: "Public stock market data") {
+  stock_update(key: {id: $id}, data: {currentPrice: $price})
+}
+
+mutation DeleteStock($id: UUID!) @auth(level: PUBLIC, insecureReason: "Public stock market data") {
+  stock_delete(key: {id: $id})
+}
+
+query GetStock($id: UUID!) @auth(level: PUBLIC, insecureReason: "Public stock market data") {
+  stock(id: $id) {
+    tickerSymbol
+    companyName
+    currentPrice
+  }
+}
+
+query ListStocks @auth(level: PUBLIC, insecureReason: "Public stock market data") {
+  stocks {
+    tickerSymbol
+    companyName
+    currentPrice
+  }
+}
+
+# Holding Operations
+mutation AddHolding($portfolioId: UUID!, $stockId: UUID!, $quantity: Float!, $averageCost: Float!, $notes: String) @auth(level: USER) {
+  holding_insert(data: {portfolioId: $portfolioId, stockId: $stockId, quantity: $quantity, averageCost: $averageCost, notes: $notes})
+}
+
+mutation UpdateHolding($id: UUID!, $quantity: Float, $averageCost: Float, $notes: String) @auth(level: USER) {
+  holding_update(key: {id: $id}, data: {quantity: $quantity, averageCost: $averageCost, notes: $notes})
+}
+
+mutation DeleteHolding($id: UUID!) @auth(level: USER) {
+  holding_delete(key: {id: $id})
+}
+
+query GetHolding($id: UUID!) @auth(level: USER) {
+  holding(id: $id) {
+    quantity
+    averageCost
+    notes
+    stock { tickerSymbol }
+  }
+}
+
+# Transaction Operations
+mutation CreateTransaction($holdingId: UUID!, $type: String!, $quantity: Float!, $price: Float!, $broker: String) @auth(level: USER) {
+  transaction_insert(data: {
+    holdingId: $holdingId,
+    type: $type,
+    quantity: $quantity,
+    pricePerShare: $price,
+    brokerName: $broker,
+    timestamp_expr: "request.time"
+  })
+}
+
+mutation DeleteTransaction($id: UUID!) @auth(level: USER) {
+  transaction_delete(key: {id: $id})
+}
+
+query ListTransactions($holdingId: UUID!) @auth(level: USER) {
+  transactions(where: {holdingId: {eq: $holdingId}}) {
+    type
+    quantity
+    pricePerShare
+    timestamp
+  }
+}
+
+# WatchlistItem Operations
+mutation AddToWatchlist($stockId: UUID!, $targetPrice: Float) @auth(level: USER) {
+  watchlistItem_insert(data: {stockId: $stockId, userId_expr: "auth.uid", targetPriceAlert: $targetPrice})
+}
+
+mutation RemoveFromWatchlist($id: UUID!) @auth(level: USER) {
+  watchlistItem_delete(key: {id: $id})
+}
+
+query GetWatchlist @auth(level: USER) {
+  watchlistItems(where: {userId: {eq_expr: "auth.uid"}}) {
+    stock { tickerSymbol }
+    targetPriceAlert
+  }
+}
