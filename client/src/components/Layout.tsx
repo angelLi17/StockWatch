@@ -1,7 +1,8 @@
 import { signOut } from 'firebase/auth'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { auth } from '../lib/firebase'
+import ErrorBoundary from './ErrorBoundary'
 
 const navItems = [
   { to: '/alerts', label: 'Alerts' },
@@ -11,6 +12,7 @@ const navItems = [
 
 export default function Layout() {
   const { user } = useAuth()
+  const location = useLocation()
 
   return (
     <div className="min-h-screen">
@@ -31,7 +33,10 @@ export default function Layout() {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 pt-8 pb-36">
-        <Outlet />
+        {/* key resets the error screen when you switch pages */}
+        <ErrorBoundary key={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       {user && (

@@ -2,11 +2,13 @@ import type { AlertCondition } from '../types'
 
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function formatPrice(value: number): string {
-  return currency.format(value)
+// Finnhub occasionally omits a field, so formatters accept null and show a dash.
+export function formatPrice(value: number | null | undefined): string {
+  return value == null ? '—' : currency.format(value)
 }
 
-export function formatPercent(value: number): string {
+export function formatPercent(value: number | null | undefined): string {
+  if (value == null) return '—'
   return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
 }
 
