@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { WatchlistItem } from "../models/WatchlistItem.js";
-import { rateFromAnalysts, summarize } from "../services/analysis.js";
+import { rate, summarize } from "../services/analysis.js";
 import { getQuote } from "../services/finnhub.js";
 import { getSymbolInfo } from "../services/symbolInfo.js";
 
@@ -55,7 +55,7 @@ watchlistRouter.get("/analysis", async (req, res) => {
       return {
         ticker,
         name: info.name,
-        rating: rateFromAnalysts(info.recommendation),
+        rating: rate(info),
         summary: summarize(info, quote),
       };
     }),

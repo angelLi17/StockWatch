@@ -14,6 +14,7 @@ const symbolCacheSchema = new Schema(
     peRatio: Number,
     week52High: Number,
     week52Low: Number,
+    isFund: Boolean, // ETFs and other funds have no company profile or analyst ratings
     recommendation: {
       strongBuy: Number,
       buy: Number,

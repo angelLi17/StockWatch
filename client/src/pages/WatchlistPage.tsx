@@ -62,7 +62,7 @@ export default function WatchlistPage() {
         </div>
       )}
 
-      <p className="text-xs text-dim">Ratings are based on Wall Street analyst consensus from Finnhub. Not investment advice.</p>
+      <p className="text-xs text-dim">Ratings are based on Wall Street analyst consensus from Finnhub. ETFs and unrated stocks are listed under Hold. Not investment advice.</p>
     </div>
   )
 }
