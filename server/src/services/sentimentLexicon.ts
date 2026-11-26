@@ -34,7 +34,7 @@ const NEGATIVE: Record<string, number> = {
   plunge: -2, plunges: -2, plunged: -2, tumble: -2, tumbles: -2, tumbled: -2, crash: -2, crashes: -2,
   sink: -1.5, sinks: -1.5, sank: -1.5, slump: -1.5, slumps: -1.5, drop: -1, drops: -1, dropped: -1,
   fall: -1, falls: -1, fell: -1, slide: -1, slides: -1, slid: -1, dip: -0.5, dips: -0.5, sell: -0.5,
-  selloff: -1.5, "sell-off": -1.5, low: -0.5, lows: -1, underperform: -1.5, underperforms: -1.5,
+  selloff: -1.5, low: -0.5, lows: -1, underperform: -1.5, underperforms: -1.5,
   // Analysts and sentiment
   downgrade: -2, downgrades: -2, downgraded: -2, bearish: -2, underweight: -1, pessimistic: -1.5,
   concern: -1, concerns: -1, worried: -1, worries: -1, worry: -1, fear: -1, fears: -1, risk: -0.5,
@@ -67,6 +67,7 @@ const PHRASES: [string[], number][] = [
   [["better", "than", "expected"], 1.5],
   [["worse", "than", "expected"], -1.5],
   [["short", "seller"], -1],
+  [["sell", "off"], -1.5],
   [["stock", "split"], 0.5],
 ];
 
@@ -76,8 +77,8 @@ function tokenize(text: string): string[] {
   return text
     .toLowerCase()
     .replace(/[’']/g, "'")
-    .split(/[^a-z0-9'-]+/)
-    .map((t) => t.replace(/^[-']+|[-']+$/g, ""))
+    .split(/[^a-z0-9']+/) // hyphens split words, so "all-time high" matches the phrase below
+    .map((t) => t.replace(/^'+|'+$/g, ""))
     .filter(Boolean);
 }
 
