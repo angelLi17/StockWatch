@@ -32,3 +32,14 @@ export function describeCondition(condition: AlertCondition, value: number): str
       return `Price -${value}%`
   }
 }
+
+// Sentiment scores run from -1 to +1 and are shown with a sign, e.g. +0.42.
+export function formatScore(value: number | null | undefined): string {
+  if (value == null) return '—'
+  return `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value).toFixed(2)}`
+}
+
+export function scoreColor(value: number | null | undefined): string {
+  if (value == null || value === 0) return 'text-muted'
+  return value > 0 ? 'text-up' : 'text-danger'
+}

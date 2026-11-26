@@ -8,6 +8,28 @@ const finnhub = axios.create({
   timeout: 10_000,
 });
 
+// The free plan allows 60 calls a minute. Loading a year of news takes a dozen calls per
+// ticker, so queue requests to stay under the limit instead of failing with 429.
+const CALLS_PER_MINUTE = 50;
+const recentCalls: number[] = [];
+
+async function waitForSlot(): Promise<void> {
+  for (;;) {
+    const now = Date.now();
+    while (recentCalls.length > 0 && now - recentCalls[0]! >= 60_000) recentCalls.shift();
+    if (recentCalls.length < CALLS_PER_MINUTE) {
+      recentCalls.push(now);
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 60_000 - (now - recentCalls[0]!) + 50));
+  }
+}
+
+finnhub.interceptors.request.use(async (request) => {
+  await waitForSlot();
+  return request;
+});
+
 export interface Quote {
   price: number;
   change: number;
@@ -110,4 +132,53 @@ export async function getRecommendation(ticker: string): Promise<Recommendation 
     strongSell: latest.strongSell,
     period: latest.period,
   };
+}
+
+export interface NewsArticle {
+  id: number;
+  datetime: number; // unix seconds
+  headline: string;
+  source: string;
+  url: string;
+}
+
+// Free endpoint: company news for North American companies, up to one year back.
+// Dates are YYYY-MM-DD and inclusive.
+export async function getCompanyNews(ticker: string, from: string, to: string): Promise<NewsArticle[]> {
+  const { data } = await finnhub.get("/company-news", { params: { symbol: ticker, from, to } });
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter((a) => a && typeof a.headline === "string" && a.headline.trim() && typeof a.datetime === "number")
+    .map((a) => ({
+      id: Number(a.id),
+      datetime: a.datetime,
+      headline: a.headline.trim(),
+      source: a.source ?? "",
+      url: a.url ?? "",
+    }));
+}
+
+export interface DailyBar {
+  date: string; // YYYY-MM-DD
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+// Daily candles are a paid Finnhub feature; used only as a fallback when the free source fails.
+export async function getDailyCandles(ticker: string, fromUnix: number, toUnix: number): Promise<DailyBar[]> {
+  const { data } = await finnhub.get("/stock/candle", {
+    params: { symbol: ticker, resolution: "D", from: fromUnix, to: toUnix },
+  });
+  if (data?.s !== "ok" || !Array.isArray(data.t)) return [];
+  return data.t.map((t: number, i: number) => ({
+    date: new Date(t * 1000).toISOString().slice(0, 10),
+    open: data.o[i],
+    high: data.h[i],
+    low: data.l[i],
+    close: data.c[i],
+    volume: data.v[i],
+  }));
 }

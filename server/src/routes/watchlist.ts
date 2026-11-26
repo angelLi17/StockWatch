@@ -2,7 +2,11 @@ import { Router } from "express";
 import { z } from "zod";
 import { WatchlistItem } from "../models/WatchlistItem.js";
 import { rate, summarize } from "../services/analysis.js";
+import { addDays, today } from "../services/dates.js";
 import { getQuote } from "../services/finnhub.js";
+import { getCurrentSentiment, getDailySentiment, HISTORY_DAYS, historyReady } from "../services/news.js";
+import { getDailyBars } from "../services/prices.js";
+import { pastCases } from "../services/sentimentStats.js";
 import { getSymbolInfo } from "../services/symbolInfo.js";
 
 // The user's tracked symbols. The Symbols page shows them as a price table,
@@ -62,6 +66,44 @@ watchlistRouter.get("/analysis", async (req, res) => {
   );
 
   res.json(results.filter((r) => r !== null));
+});
+
+// Price moves after past days with similar sentiment. Loading a ticker's year of news takes
+// a minute the first time, so until then this reports "loading" and the page asks again later.
+async function sentimentHistory(ticker: string, score: number | null) {
+  if (score === null) return { status: "unavailable" as const };
+  if (!(await historyReady(ticker))) return { status: "loading" as const };
+
+  const [days, bars] = await Promise.all([getDailySentiment(ticker), getDailyBars(ticker)]);
+  const closed = bars.filter((b) => b.date < today()); // skip today's unfinished bar
+  if (closed.length === 0) return { status: "unavailable" as const };
+  return { status: "ready" as const, ...pastCases(days, closed, score, addDays(today(), -HISTORY_DAYS)) };
+}
+
+// GET /api/watchlist/sentiment?history=1 → news sentiment for each ticker from the last week of
+// Finnhub company news headlines. With history=1, also how the price moved after similar sentiment.
+watchlistRouter.get("/sentiment", async (req, res) => {
+  const tickers = await userTickers(req.uid);
+  const withHistory = req.query.history === "1" || req.query.history === "true";
+
+  const results = await Promise.all(
+    tickers.map(async (ticker) => {
+      try {
+        const current = await getCurrentSentiment(ticker);
+        if (!withHistory) return current;
+        const history = await sentimentHistory(ticker, current.score).catch((err) => {
+          console.error(`[sentiment] history for ${ticker} failed:`, err.message);
+          return { status: "unavailable" as const };
+        });
+        return { ...current, history };
+      } catch (err) {
+        console.error(`[sentiment] ${ticker} failed:`, (err as Error).message);
+        return { ticker, error: "News is unavailable right now" };
+      }
+    }),
+  );
+
+  res.json(results);
 });
 
 // POST /api/watchlist  { ticker: "AAPL" }

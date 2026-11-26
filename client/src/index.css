@@ -15,7 +15,8 @@
   --color-muted: #8a94b8;    /* secondary text */
   --color-dim: #2f3f8f;      /* placeholders, inactive nav */
   --color-accent: #4fd2ef;   /* selected ticker, links */
-  --color-danger: #f87171;
+  --color-danger: #f87171;  /* negative / sell */
+  --color-up: #4ade80;      /* positive / buy */
 }
 
 body {
