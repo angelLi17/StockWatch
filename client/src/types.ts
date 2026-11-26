@@ -50,3 +50,52 @@ export interface PriceAlert {
   triggeredPrice?: number
   createdAt: string
 }
+
+// News sentiment from Finnhub company news headlines (GET /api/watchlist/sentiment)
+export type SentimentSignal = 'buy' | 'hold' | 'sell'
+
+export interface ScoredHeadline {
+  headline: string
+  source: string
+  url: string
+  datetime: number
+  score: number
+}
+
+export interface PastMove {
+  avgPct: number
+  cases: number
+  upCount: number
+}
+
+export interface SentimentBand {
+  band: [number, number]
+  oneDay: PastMove | null
+  fiveDay: PastMove | null
+}
+
+export type SentimentHistory =
+  | { status: 'loading' }
+  | { status: 'unavailable' }
+  | {
+      status: 'ready'
+      band: [number, number]
+      oneDay: PastMove | null
+      fiveDay: PastMove | null
+      bands: SentimentBand[] // every sentiment level, most negative first
+      baseline: { oneDay: PastMove | null; fiveDay: PastMove | null } // all days, any sentiment
+      from: string
+      to: string
+    }
+
+export interface Sentiment {
+  ticker: string
+  score: number | null
+  signal: SentimentSignal | null
+  articleCount: number
+  scoredCount: number
+  windowDays: number
+  headlines: ScoredHeadline[]
+  history?: SentimentHistory
+  error?: string
+}
